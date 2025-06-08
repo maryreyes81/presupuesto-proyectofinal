@@ -1,4 +1,7 @@
-class Dato {
+import { Ingreso } from "./Ingreso.mjs";
+import { Egreso } from "./Egreso.mjs";
+
+export class Dato {
   constructor(descripcion, valor) {
     this._descripcion = descripcion;
     this._valor = valor;
