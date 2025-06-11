@@ -1,4 +1,4 @@
-
+import { Dato } from "./Dato.mjs";
 
 
  export class Ingreso extends Dato {

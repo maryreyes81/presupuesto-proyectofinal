@@ -1,5 +1,3 @@
-import { Ingreso } from "./Ingreso.mjs";
-import { Egreso } from "./Egreso.mjs";
 
 export class Dato {
   constructor(descripcion, valor) {

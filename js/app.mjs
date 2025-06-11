@@ -1,6 +1,6 @@
 import { Ingreso } from "./Ingreso.mjs";
 import { Egreso} from "./Egreso.mjs";
-import {Dato} from "./Dato.mjs";
+
 
 let ingresos = [
   new Ingreso("Salario", 20000),

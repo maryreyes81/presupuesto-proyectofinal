@@ -1,3 +1,5 @@
+ import { Dato } from "./Dato.mjs";
+ 
  export class Egreso extends Dato {
 static contadorEgresos = 0;
 
