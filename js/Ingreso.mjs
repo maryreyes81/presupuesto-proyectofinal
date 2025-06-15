@@ -1,16 +1,14 @@
 import { Dato } from "./Dato.mjs";
 
-
- export class Ingreso extends Dato {
+export class Ingreso extends Dato {
   static contadorIngresos = 0;
 
   constructor(descripcion, valor) {
     super(descripcion, valor);
-    this._id = ++Ingreso.contadorIngresos; // Preincremento para asignar ID único
+    this._id = ++Ingreso.contadorIngresos;
   }
 
   get id() {
     return this._id;
   }
 }
-

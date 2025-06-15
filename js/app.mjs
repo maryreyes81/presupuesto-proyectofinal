@@ -9,6 +9,12 @@ let ingresos = [
 
 let egresos = [new Egreso("Renta", 4000), new Egreso("Ropa", 800)];
 
+const cargarApp = () => {
+  cargarCabecero();
+  cargarIngresos();
+  cargarEgresos();
+};
+
 const totalIngresos = () => {
   let totalIngreso = 0;
   for (let ingreso of ingresos) {
@@ -25,22 +31,8 @@ const totalEgresos = () => {
   return totalEgreso;
 };
 
-const cargarCabecero = () => {
-  const ingresoTotal = totalIngresos();
-  const egresoTotal = totalEgresos();
-  const presupuesto = ingresoTotal - egresoTotal;
-  const porcentajeEgreso = egresoTotal / ingresoTotal;
-
-  // Asignar valores formateados a los elementos HTML
-  document.getElementById("presupuesto").innerHTML = formatoMoneda(presupuesto);
-  document.getElementById("porcentaje").innerHTML =
-    formatoPorcentaje(porcentajeEgreso);
-  document.getElementById("ingresos").innerHTML = formatoMoneda(ingresoTotal);
-  document.getElementById("egresos").innerHTML = formatoMoneda(egresoTotal);
-};
-
 //Formato moneda
-const formatoMoneda = (valor) => {
+let formatoMoneda = (valor) => {
   return valor.toLocaleString("es-MX", {
     style: "currency",
     currency: "MXN",
@@ -48,20 +40,28 @@ const formatoMoneda = (valor) => {
   });
 };
 
-const formatoPorcentaje = (valor) => {
+let formatoPorcentaje = (valor) => {
   return valor.toLocaleString("es-MX", {
     style: "percent",
     minimumFractionDigits: 2,
   });
 };
-cargarCabecero();
 
-const cargarApp = () => {
-  cargarCabecero();
-  cargarIngresos();
-  cargarEgresos();
+const cargarCabecero = () => {
+  const ingresoTotal = totalIngresos();
+  const egresoTotal = totalEgresos();
+  const presupuesto = ingresoTotal - egresoTotal;
+  const porcentajeEgreso = ingresoTotal > 0 ? egresoTotal / ingresoTotal : 0;
+
+  // Asignar valores formateados a los elementos HTML
+document.getElementById("presupuesto").innerHTML = formatoMoneda(presupuesto);
+  document.getElementById("porcentaje").innerHTML = formatoPorcentaje(porcentajeEgreso);
+  document.getElementById("ingresos").innerHTML = formatoMoneda(ingresoTotal);
+  document.getElementById("egresos").innerHTML = formatoMoneda(egresoTotal);
 };
 
+
+cargarCabecero();
 window.onload = cargarApp;
 
 const cargarIngresos = () => {
@@ -74,12 +74,12 @@ const cargarIngresos = () => {
 
 const crearIngresoHTML = (ingreso) => {
   return `
-<div class="elemento limpiarEstilos">
+<div class="elemento limpiarEstilos" id="ingreso-${ingreso.id}">
 <div class="elemento_descripcion">${ingreso.descripcion}</div>
 <div class="derecha limpiarEstilos">
 <div class="elemento_valor">+${formatoMoneda(parseFloat(ingreso.valor.toFixed(2)))}</div>
 <div class="elemento_eliminar">
-<button class="elemento_eliminar_btn" onclick="eliminarIngreso(${ingreso.id})">
+<button class="elemento_eliminar--btn" onclick="eliminarIngreso(${ingreso.id})">
 <ion-icon name="close-circle-outline"></ion-icon>
 </button>
 </div>
@@ -97,15 +97,15 @@ const cargarEgresos = () => {
 };
 
 const crearEgresoHTML = (egreso) => {
-  const porcentaje = egreso.valor / totalEgresos();
+  let porcentaje = egreso.valor / totalEgresos();
   return `
-<div class="elemento limpiarEstilos">
+<div class="elemento limpiarEstilos" id="egreso-${egreso.id}">
 <div class="elemento_descripcion">${egreso.descripcion}</div>
 <div class="derecha limpiarEstilos">
 <div class="elemento_valor">-${formatoMoneda(egreso.valor)}</div>
 <div class="elemento_porcentaje">${formatoPorcentaje(porcentaje)}</div>
 <div class="elemento_eliminar">
-<button class="elemento_eliminar_btn" onclick="eliminarEgreso(${egreso.id})">
+<button class="elemento_eliminar--btn" onclick="eliminarEgreso(${egreso.id})">
 <ion-icon name="close-circle-outline"></ion-icon>
 </button>
 </div>
@@ -127,21 +127,40 @@ const eliminarEgreso = (id) => {
   cargarEgresos();
 };
 
-document.getElementById("forma").addEventListener("submit", function (e) {
-  e.preventDefault();
-  const tipo = document.getElementById("tipo").value;
-  const descripcion = document.getElementById("descripcion").value;
-  const valor = parseFloat(document.getElementById("valor").value);
+///Agregar nuevo ingreso o egreso
 
-  if (descripcion !== "" && !isNaN(valor)) {
-    if (tipo === "ingreso") {
-      ingresos.push(new Ingreso(descripcion, valor));
-      cargarIngresos();
-    } else {
-      egresos.push(new Egreso(descripcion, valor));
-      cargarEgresos();
-    }
+const agregarDato = () => {
+  const forma = document.getElementById('forma');
+  const tipo = forma['tipo'].value;
+  const descripcion = forma['descripcion'].value;
+  const valor = parseFloat(forma["valor"].value);
+
+if (descripcion !== '' && !isNaN(valor) && valor > 0) {
+  if (tipo === 'ingreso') {
+    ingresos.push(new Ingreso(descripcion, valor));
     cargarCabecero();
-    document.getElementById("forma").reset();
+    cargarIngresos();
+  } else if (tipo === 'egreso') {
+    egresos.push(new Egreso(descripcion, valor));
+    cargarCabecero();
+    cargarEgresos();
   }
+  forma.reset(); // limpiar formulario
+} else {
+  alert("Por favor, ingresa una descripción y un valor numérico positivo.");
+}
+}
+
+// Asegurar que los botones de eliminar funcionen
+window.eliminarIngreso = eliminarIngreso;
+window.eliminarEgreso = eliminarEgreso;
+window.agregarDato = agregarDato;
+
+// Escuchar envío del formulario cuando el DOM esté listo
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("forma").addEventListener("submit", function (e) {
+    e.preventDefault(); // evita recargar la página
+    agregarDato();      // llama tu función
+  });
 });
